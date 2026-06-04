@@ -1,0 +1,122 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Base ── */
+* { -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Pretendard', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #0F0A1E;
+  color: #F1F0F9;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Stamp Check-in Animation ── */
+@keyframes stamp-glow {
+  0%   { transform: scale(0.6) rotate(-15deg); opacity: 0; box-shadow: 0 0 0px rgba(124,58,237,0); }
+  50%  { transform: scale(1.2) rotate(5deg);   opacity: 1; box-shadow: 0 0 24px rgba(124,58,237,0.9); }
+  75%  { transform: scale(0.95) rotate(-2deg);             box-shadow: 0 0 16px rgba(124,58,237,0.6); }
+  100% { transform: scale(1) rotate(0deg);     opacity: 1; box-shadow: 0 0 12px rgba(124,58,237,0.4); }
+}
+
+.stamp-checkin {
+  animation: stamp-glow 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* ── Progress Bar Fill ── */
+@keyframes progress-fill {
+  from { width: 0%; }
+  to   { width: var(--progress-width, 0%); }
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4F46E5, #7C3AED, #A78BFA);
+  border-radius: 9999px;
+  animation: progress-fill 0.8s ease-out forwards;
+  box-shadow: 0 0 8px rgba(124,58,237,0.6);
+}
+
+/* ── SOS Button Pulse ── */
+@keyframes sos-pulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(220,38,38,0.3), 0 0 24px rgba(220,38,38,0.5); }
+  50%       { box-shadow: 0 0 0 8px rgba(220,38,38,0.15), 0 0 36px rgba(220,38,38,0.7); }
+}
+
+/* ── Badge Unlock Gold Glow ── */
+@keyframes badge-unlock-gold {
+  0%   { box-shadow: 0 0 0 0 rgba(234,179,8,0.8);  transform: scale(1); }
+  40%  { box-shadow: 0 0 0 16px rgba(234,179,8,0); transform: scale(1.12); }
+  100% { box-shadow: 0 0 10px rgba(234,179,8,0.5); transform: scale(1); }
+}
+
+.badge-unlocked {
+  animation: badge-unlock-gold 0.7s ease-out forwards;
+}
+
+/* ── Confetti Particles ── */
+@keyframes confetti-burst {
+  0%   { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--tx, 0px), var(--ty, -40px)) scale(0.4); opacity: 0; }
+}
+
+.confetti-particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  animation: confetti-burst 0.6s ease-out forwards;
+  pointer-events: none;
+}
+
+.confetti-particle:nth-child(1) { background: #7C3AED; --tx: -24px; --ty: -36px; }
+.confetti-particle:nth-child(2) { background: #A78BFA; --tx:  20px; --ty: -40px; }
+.confetti-particle:nth-child(3) { background: #EAB308; --tx:  32px; --ty: -20px; }
+.confetti-particle:nth-child(4) { background: #4F46E5; --tx: -30px; --ty: -18px; }
+.confetti-particle:nth-child(5) { background: #F1F0F9; --tx:   8px; --ty: -44px; }
+.confetti-particle:nth-child(6) { background: #EAB308; --tx: -12px; --ty: -42px; }
+
+/* ── Calendar Grid (9-column stamp style) ── */
+.stamp-grid {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  gap: 6px;
+  padding: 12px;
+}
+
+/* ── Scrollbar Hide ── */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ── Safe Area Bottom Padding ── */
+.pb-safe { padding-bottom: env(safe-area-inset-bottom, 16px); }
+
+/* ── Purple Glow Card Hover ── */
+@keyframes card-glow-in {
+  from { box-shadow: 0 0 0px rgba(124,58,237,0); }
+  to   { box-shadow: 0 0 20px rgba(124,58,237,0.3); }
+}
+
+.card-interactive:active {
+  animation: card-glow-in 0.15s ease-out forwards;
+}
+
+/* ── Shimmer Skeleton ── */
+@keyframes shimmer {
+  0%   { background-position: -360px 0; }
+  100% { background-position: 360px 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #1A1035 25%, #2D1F5E 50%, #1A1035 75%);
+  background-size: 720px 100%;
+  animation: shimmer 1.4s infinite linear;
+  border-radius: 8px;
+}
+
+/* 모바일 최적화 기본 스타일 */
+html { font-size: 16px; }
+body { overscroll-behavior: none; }
