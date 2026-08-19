@@ -76,15 +76,6 @@ Lally et al. 2010, 출처 명시)과 재발 고위험 구간(3~6개월) 통과�
 3. **해금 조건 불일치** — Calendar는 `dayNumber > m.day || completedDays >= m.day`,
    Dashboard는 `dayNumber >= m.day`로 서로 달랐다. `isMilestoneUnlocked()`로 통일.
 
-### GitHub push — 완료
-
-`feat/afc-200`을 `origin`에 올렸다(커밋 3개). `main`은 건드리지 않았다.
-**PR은 아직 안 열렸다** — `gh` CLI가 없어서 웹에서 직접 눌러야 한다:
-
-```
-https://github.com/superpjh-stack/AFC90/compare/main...feat/afc-200?expand=1
-```
-
 ### 검증 — 전부 통과
 
 Chrome 확장이 연결돼 있지 않아 **브라우저 대신 서버 렌더링으로** 검증했다.
@@ -97,8 +88,18 @@ Chrome 확장이 연결돼 있지 않아 **브라우저 대신 서버 렌더링�
 
 ## 지금 해야 할 것
 
-1. **PR 열기** — push는 끝났고 PR만 남았다. 위 compare URL을 열어 생성한다.
-   PR 본문 초안은 아래 "PR 본문" 절에 있다.
+1. **push + PR** — 아직 로컬 커밋 3개뿐이다. 원격에 브랜치가 없다.
+   **push는 사용자가 직접 실행해야 한다** (에이전트가 돌리면 인증 프롬프트에서 멈춘다):
+
+   ```
+   ! git push -u origin feat/afc-200
+   ```
+
+   성공하면 아래 URL로 PR을 연다. 본문 초안은 이 파일의 "PR 본문" 절에 있다.
+
+   ```
+   https://github.com/superpjh-stack/AFC90/compare/main...feat/afc-200?expand=1
+   ```
 
 2. **브라우저에서 눈으로 확인** — 유일하게 남은 검증 공백이다. dev 서버를 띄우고
    (`npm run dev` → http://localhost:5173) DevTools 콘솔에 아래를 붙여 넣으면
@@ -207,6 +208,16 @@ Lally et al. 2010)에 대다수가 도달하는 지점이다.
 여기에 200을 박으면 Day 201부터 진행 중인 단계가 사라진다 — 전환 전 `[31, 90]`이
 바로 그래서 Day 91부터 모든 단계가 "완료"로 뜨고 현재 단계가 없어졌다.
 크래시는 아니었다(`currentStageIndex`는 계산만 하고 아무 데도 안 쓰는 죽은 변수).
+
+### push는 에이전트가 못 한다 — 인증에서 멈춘다
+
+`git push -u origin feat/afc-200`을 돌리면 **3분 타임아웃까지 무응답**이다.
+`credential.helper`는 `osxkeychain`인데 키체인에 유효한 자격 증명이 없어서
+사용자명/비밀번호 프롬프트에 걸리는 것으로 보인다. 읽기(`git ls-remote`)는
+공개 저장소라 익명으로 되므로 **네트워크 문제가 아니다.**
+
+**대응**: 재시도하지 마라. 사용자에게 `! git push -u origin feat/afc-200`을
+직접 실행하도록 안내한다. 자격 증명 입력은 에이전트가 해서는 안 되는 일이다.
 
 ### `gh` CLI가 없다
 
