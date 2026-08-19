@@ -84,6 +84,23 @@ https://github.com/superpjh-stack/AFC90/pull/1 — OPEN, 18파일 `+653/-428`
 
 `gh auth login`(브라우저 device flow, 계정 `superpjh-stack`)으로 인증했다.
 
+### Vercel Preview 배포 — 자동 완료 (2026-08-19)
+
+이 저장소는 **Vercel이 GitHub에 연동돼 있어 push만으로 배포된다.** CLI도 링크도 필요 없다
+(`vercel` CLI 미설치, `.vercel` 없음 — 그래도 배포된다).
+
+| 환경 | URL | 상태 |
+|---|---|---|
+| Preview (`feat/afc-200`) | https://afc90-git-feat-afc-200-gerardo-team.vercel.app | ✅ 배포 성공 |
+| Production (`main`) | https://afc90.vercel.app | ⚠️ **아직 옛 90일 빌드** |
+
+프로덕션은 `main`에서만 나간다. PR #1을 머지해야 200일 버전이 라이브가 된다.
+확인 결과 프로덕션 번들에는 아직 `AFC 90`·`afc90_profile`만 있고 `AFC 200`은 0건이다.
+
+**Preview는 Vercel SSO(Deployment Protection)가 걸려 있다** — 익명 접근은 302로
+`vercel.com/login`으로 튕긴다. Vercel 계정에 로그인한 브라우저에서만 열린다.
+그래서 curl로는 내용 검증이 불가능하다.
+
 ### 검증 — 전부 통과
 
 Chrome 확장이 연결돼 있지 않아 **브라우저 대신 서버 렌더링으로** 검증했다.
@@ -96,9 +113,14 @@ Chrome 확장이 연결돼 있지 않아 **브라우저 대신 서버 렌더링�
 
 ## 지금 해야 할 것
 
-1. **브라우저에서 눈으로 확인** — 유일하게 남은 검증 공백이다. dev 서버를 띄우고
-   (`npm run dev` → http://localhost:5173) DevTools 콘솔에 아래를 붙여 넣으면
-   Day 121 상태로 바로 간다. 레거시 키만 심으므로 마이그레이션도 같이 검증된다:
+1. **브라우저에서 눈으로 확인** — 유일하게 남은 검증 공백이다. **배포된 Preview에서
+   바로 하면 된다** (Vercel 로그인된 브라우저 필요):
+
+   https://afc90-git-feat-afc-200-gerardo-team.vercel.app
+
+   로컬로 하려면 `npm run dev` → http://localhost:5173. 어느 쪽이든 DevTools 콘솔에
+   아래를 붙여 넣으면 Day 121 상태로 바로 간다. 레거시 키만 심으므로 마이그레이션도
+   같이 검증된다:
 
    ```js
    localStorage.clear();
@@ -122,7 +144,11 @@ Chrome 확장이 연결돼 있지 않아 **브라우저 대신 서버 렌더링�
    - SOS 모달 붉은 그라데이션 애니메이션이 안 깨졌는지 (`90deg` 오변경 방지)
    - DevTools Application 탭에서 `afc200_*` 키가 생기고 `afc90_*`가 보존됐는지
 
-2. (선택) `/pdca analyze AFC200` 재실행 — `docs/03-analysis/AFC90.analysis.md`는 지난
+2. **프로덕션 배포** — Preview 확인이 끝나면 PR #1을 `main`에 머지한다.
+   Vercel이 `main`을 자동으로 프로덕션 배포하므로 **머지가 곧 배포다.**
+   `gh pr merge 1 --squash` 또는 GitHub 웹에서. 되돌리려면 revert 커밋이 필요하다.
+
+3. (선택) `/pdca analyze AFC200` 재실행 — `docs/03-analysis/AFC90.analysis.md`는 지난
    사이클의 **기록물**이라 일부러 안 건드렸다. 새 리포트를 만들려면 이걸 돌린다.
 
 ## PR 본문 (PR #1에 이미 반영됨)
