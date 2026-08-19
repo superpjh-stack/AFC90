@@ -57,20 +57,20 @@ export default function Onboarding({ onComplete }) {
               <span className="text-4xl" role="img" aria-label="no alcohol">🚫🍺</span>
             </div>
             <h1 className="text-2xl font-bold text-[#F1F0F9] tracking-tight leading-tight">
-              AFC 90
+              AFC 200
             </h1>
             <p className="text-xs text-[#A78BFA]/60 tracking-widest uppercase font-medium">
-              술 없이 90일, 진짜 나를 되찾다
+              술 없이 200일, 진짜 나를 되찾다
             </p>
           </div>
 
           {/* Subtitle */}
           <div className="bg-[#1A1035] rounded-2xl p-4 shadow-lg border border-[#7C3AED]/20 backdrop-blur-sm w-full text-center">
             <h2 className="text-lg font-semibold text-[#F1F0F9] tracking-tight mb-2">
-              AFC 90 챌린지 시작하기
+              AFC 200 챌린지 시작하기
             </h2>
             <p className="text-sm text-[#A78BFA]/80 leading-relaxed">
-              90일 후, 당신은 완전히 달라집니다.{'\n'}
+              200일 후, 당신은 완전히 달라집니다.{'\n'}
               <span className="block mt-1">지금 이 순간이 변화의 첫 걸음입니다.</span>
             </p>
           </div>
@@ -187,8 +187,8 @@ export default function Onboarding({ onComplete }) {
           <div className="bg-[#7C3AED]/10 border border-[#7C3AED]/20 rounded-xl px-4 py-3 flex items-start gap-3">
             <span className="text-lg mt-0.5" role="img" aria-label="fire">🔥</span>
             <p className="text-xs text-[#A78BFA]/80 leading-relaxed">
-              90일 챌린지를 완료하면 평균{' '}
-              <span className="text-[#A78BFA] font-semibold">3–5kg 감량</span>과{' '}
+              200일 챌린지를 완료하면 평균{' '}
+              <span className="text-[#A78BFA] font-semibold">5–8kg 감량</span>과{' '}
               <span className="text-[#A78BFA] font-semibold">수면 질 향상</span>을 경험합니다.
             </p>
           </div>
@@ -198,7 +198,7 @@ export default function Onboarding({ onComplete }) {
             onClick={handleSubmit}
             className="w-full bg-[#7C3AED] hover:bg-[#6D28D9] active:bg-[#5B21B6] text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-[0_0_16px_rgba(124,58,237,0.4)] active:scale-95 mt-2"
           >
-            🚀 90일 챌린지 시작하기
+            🚀 200일 챌린지 시작하기
           </button>
 
           <p className="text-xs text-[#A78BFA]/40 text-center pb-4">

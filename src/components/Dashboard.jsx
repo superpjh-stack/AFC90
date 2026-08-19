@@ -1,45 +1,10 @@
 import { useState, useEffect } from "react";
-
-const MILESTONES = [
-  {
-    day: 3,
-    name: "첫 고비 돌파",
-    emoji: "🌱",
-    message:
-      "가장 힘든 72시간을 이겨냈습니다! 알코올이 몸에서 완전히 빠져나갔어요. 당신은 이미 대부분의 사람들이 포기하는 첫 번째 고비를 넘었습니다. 진심으로 축하합니다!",
-  },
-  {
-    day: 7,
-    name: "일주일 챔피언",
-    emoji: "🏅",
-    message:
-      "일주일 동안 단 하루도 무너지지 않았습니다. 수면이 좋아지고, 몸이 가벼워진 게 느껴지시나요? 당신은 이미 챔피언입니다. 다음 목표는 21일!",
-  },
-  {
-    day: 21,
-    name: "습관의 씨앗",
-    emoji: "🌿",
-    message:
-      "21일! 과학이 증명한 습관 형성의 마법 숫자를 달성했습니다. 금주가 이제 당신의 새로운 일상이 되었어요. 피부는 맑아지고, 에너지는 넘칩니다. 절반까지 달려봅시다!",
-  },
-  {
-    day: 50,
-    name: "절반의 영웅",
-    emoji: "⚡",
-    message:
-      "50일! 챌린지의 절반을 넘었습니다. 간이 눈에 띄게 회복되고, 뇌 기능도 최고조를 향해 달려가고 있어요. 이 정도면 영웅이라 불려 마땅합니다. 이제 결승선이 보입니다!",
-  },
-  {
-    day: 90,
-    name: "AFC 완주자",
-    emoji: "🏆",
-    message:
-      "90일 완주!! 당신은 해냈습니다! 간이 완전히 회복되고, 심혈관 건강이 크게 개선됐으며, 새로운 당신이 탄생했습니다. AFC 완주자의 자격으로, 앞으로의 모든 도전도 이겨낼 수 있습니다. 정말 자랑스럽습니다!",
-  },
-];
+import { CHALLENGE_DAYS, MILESTONES, isMilestoneUnlocked } from "../data/challenge";
 
 function getNextMilestone(dayNumber) {
-  return MILESTONES.find((m) => m.day > dayNumber) || MILESTONES[MILESTONES.length - 1];
+  // Returns null once every milestone is earned, so the UI can celebrate instead
+  // of showing a "next goal" that has already been passed.
+  return MILESTONES.find((m) => m.day > dayNumber) || null;
 }
 
 function getUnlockedMilestones(dayNumber) {
@@ -62,10 +27,9 @@ export default function Dashboard({
   const name = profile?.name || "용사";
   const nextMilestone = getNextMilestone(dayNumber);
   const unlockedMilestones = getUnlockedMilestones(dayNumber);
-  const progressToNext =
-    nextMilestone.day === dayNumber
-      ? 100
-      : Math.min(100, Math.round((dayNumber / nextMilestone.day) * 100));
+  const progressToNext = nextMilestone
+    ? Math.min(100, Math.round((dayNumber / nextMilestone.day) * 100))
+    : 100;
 
   const handleCheckin = () => {
     if (todayChecked || stamping) return;
@@ -103,7 +67,7 @@ export default function Dashboard({
 
       {/* ─── Header ──────────────────────────────────────────────── */}
       <div className="px-4 pt-10 pb-4">
-        <p className="text-xs text-[#A78BFA]/60 tracking-wide uppercase mb-0.5">AFC 90일 챌린지</p>
+        <p className="text-xs text-[#A78BFA]/60 tracking-wide uppercase mb-0.5">AFC 200일 챌린지</p>
         <h1 className="text-2xl font-bold text-[#F1F0F9] tracking-tight leading-tight">
           안녕하세요, {name}님 💪
         </h1>
@@ -129,7 +93,9 @@ export default function Dashboard({
               다음 마일스톤
             </span>
             <span className="text-xs text-[#A78BFA]/60">
-              {nextMilestone.emoji} {nextMilestone.name}
+              {nextMilestone
+                ? `${nextMilestone.emoji} ${nextMilestone.name}`
+                : "🏆 전 배지 달성!"}
             </span>
           </div>
           <div className="w-full h-2 bg-[#0F0A1E] rounded-full overflow-hidden border border-[#4F46E5]/20 mb-1">
@@ -140,7 +106,7 @@ export default function Dashboard({
           </div>
           <div className="flex justify-between text-[10px] text-[#A78BFA]/50">
             <span>{dayNumber}일</span>
-            <span>{nextMilestone.day}일 목표</span>
+            <span>{nextMilestone ? `${nextMilestone.day}일 목표` : `${CHALLENGE_DAYS}일 완주`}</span>
           </div>
         </div>
       </div>
@@ -269,7 +235,7 @@ export default function Dashboard({
         </p>
         <div className="flex flex-wrap gap-2">
           {MILESTONES.map((m) => {
-            const unlocked = dayNumber >= m.day;
+            const unlocked = isMilestoneUnlocked(m, dayNumber);
             return (
               <span
                 key={m.day}
