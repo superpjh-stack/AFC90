@@ -1,48 +1,38 @@
 import { useState, useEffect, useCallback } from "react";
+import { MILESTONES } from "../data/challenge";
 
 const STORAGE_KEYS = {
+  PROFILE: "afc200_profile",
+  CHECKINS: "afc200_checkins",
+  SHOWN_MILESTONES: "afc200_shown_milestones",
+};
+
+// Keys used before the challenge was extended from 90 to 200 days.
+const LEGACY_STORAGE_KEYS = {
   PROFILE: "afc90_profile",
   CHECKINS: "afc90_checkins",
   SHOWN_MILESTONES: "afc90_shown_milestones",
 };
 
-const MILESTONES = [
-  {
-    day: 3,
-    name: "첫 고비 돌파",
-    emoji: "🌱",
-    message:
-      "가장 힘든 72시간을 이겨냈습니다! 알코올이 몸에서 완전히 빠져나갔어요. 당신은 이미 대부분의 사람들이 포기하는 첫 번째 고비를 넘었습니다. 진심으로 축하합니다!",
-  },
-  {
-    day: 7,
-    name: "일주일 챔피언",
-    emoji: "🏅",
-    message:
-      "일주일 동안 단 하루도 무너지지 않았습니다. 수면이 좋아지고, 몸이 가벼워진 게 느껴지시나요? 당신은 이미 챔피언입니다. 다음 목표는 21일!",
-  },
-  {
-    day: 21,
-    name: "습관의 씨앗",
-    emoji: "🌿",
-    message:
-      "21일! 과학이 증명한 습관 형성의 마법 숫자를 달성했습니다. 금주가 이제 당신의 새로운 일상이 되었어요. 피부는 맑아지고, 에너지는 넘칩니다. 절반까지 달려봅시다!",
-  },
-  {
-    day: 50,
-    name: "절반의 영웅",
-    emoji: "⚡",
-    message:
-      "50일! 챌린지의 절반을 넘었습니다. 간이 눈에 띄게 회복되고, 뇌 기능도 최고조를 향해 달려가고 있어요. 이 정도면 영웅이라 불려 마땅합니다. 이제 결승선이 보입니다!",
-  },
-  {
-    day: 90,
-    name: "AFC 완주자",
-    emoji: "🏆",
-    message:
-      "90일 완주!! 당신은 해냈습니다! 간이 완전히 회복되고, 심혈관 건강이 크게 개선됐으며, 새로운 당신이 탄생했습니다. AFC 완주자의 자격으로, 앞으로의 모든 도전도 이겨낼 수 있습니다. 정말 자랑스럽습니다!",
-  },
-];
+// One-time migration: carry existing users' records over to the new keys.
+function migrateLegacyStorage() {
+  try {
+    Object.keys(STORAGE_KEYS).forEach((name) => {
+      const nextKey = STORAGE_KEYS[name];
+      const legacyKey = LEGACY_STORAGE_KEYS[name];
+      if (localStorage.getItem(nextKey) === null) {
+        const legacyValue = localStorage.getItem(legacyKey);
+        if (legacyValue !== null) {
+          localStorage.setItem(nextKey, legacyValue);
+        }
+      }
+    });
+  } catch {
+    // localStorage unavailable — nothing to migrate.
+  }
+}
+
+migrateLegacyStorage();
 
 // Average kcal per drink: 130kcal
 const KCAL_PER_DRINK = 130;

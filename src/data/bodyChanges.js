@@ -3,6 +3,7 @@ export const BODY_CHANGES = {
   stages: [
     {
       days: "1-3",
+      range: [1, 3],
       title: "해독기",
       icon: "🌊",
       changes: [
@@ -14,6 +15,7 @@ export const BODY_CHANGES = {
     },
     {
       days: "4-7",
+      range: [4, 7],
       title: "회복의 시작",
       icon: "🌅",
       changes: [
@@ -25,6 +27,7 @@ export const BODY_CHANGES = {
     },
     {
       days: "8-30",
+      range: [8, 30],
       title: "대사 개선기",
       icon: "⚡",
       changes: [
@@ -38,36 +41,59 @@ export const BODY_CHANGES = {
     },
     {
       days: "31-90",
+      range: [31, 90],
       title: "습관 정착기",
       icon: "🌿",
       changes: [
-        "간이 완전히 회복되어 해독 능력이 최고조에 달합니다",
-        "심혈관 건강이 크게 개선되고 암 위험도 낮아집니다",
+        "간 지방이 크게 줄고 해독 능력이 회복됩니다",
+        "심혈관 건강이 개선되고 혈압·콜레스테롤이 안정화됩니다",
         "수면 패턴이 완전히 정상화됩니다",
         "자존감과 정신 건강이 눈에 띄게 향상됩니다",
       ],
       coaching:
-        "이제 금주는 당신의 일부가 되었습니다. 90일 완주를 향해 마지막 스퍼트를 올려보세요!",
+        "이제 금주는 당신의 일부가 되었습니다. 90일 세포 재생 완성을 향해 달려보세요!",
+    },
+    {
+      days: "91-150",
+      range: [91, 150],
+      title: "재생 완성기",
+      icon: "🧬",
+      changes: [
+        "적혈구가 완전히 새로 교체되어 산소 운반 능력이 회복됩니다",
+        "도파민 수용체가 정상화되어 술 없이도 즐거움을 느낍니다",
+        "면역 기능이 회복되고 잔병치레가 줄어듭니다",
+        "간 수치(GGT·ALT)가 정상 범위로 돌아옵니다",
+      ],
+      coaching:
+        "세포 수준의 재생이 끝나는 구간입니다. 여기서부터는 '버티는 것'이 아니라 '유지하는 것'이에요.",
+    },
+    {
+      days: "151-200",
+      range: [151, Infinity],
+      title: "새로운 나",
+      icon: "👑",
+      changes: [
+        "금주가 의지가 아닌 자동화된 습관으로 자리 잡습니다",
+        "재발 위험이 가장 높은 6개월 구간을 통과합니다",
+        "장기 음주로 인한 암·심혈관 질환 위험이 뚜렷하게 낮아집니다",
+        "감정 기복이 줄고 스트레스 대처 능력이 향상됩니다",
+      ],
+      coaching:
+        "술 없는 삶이 기본값이 된 단계입니다. 200일 완주까지, 그리고 그 이후로도 이 리듬을 지켜가세요.",
     },
   ],
 };
 
 /**
  * Returns the body-change stage that corresponds to the given day number (1-based).
- * Falls back to the last stage if day > 90.
+ * The final stage is open-ended, so days past the challenge length still resolve.
  *
- * @param {number} day - Current challenge day (1–90+)
- * @returns {{ days: string, title: string, icon: string, changes: string[], coaching: string }}
+ * @param {number} day - Current challenge day (1–200+)
+ * @returns {{ days: string, range: number[], title: string, icon: string, changes: string[], coaching: string }}
  */
 export function getBodyChangeForDay(day) {
-  const ranges = [
-    { min: 1, max: 3, index: 0 },
-    { min: 4, max: 7, index: 1 },
-    { min: 8, max: 30, index: 2 },
-    { min: 31, max: Infinity, index: 3 },
-  ];
-
-  const match = ranges.find((r) => day >= r.min && day <= r.max);
-  const index = match ? match.index : BODY_CHANGES.stages.length - 1;
-  return BODY_CHANGES.stages[index];
+  const match = BODY_CHANGES.stages.find(
+    (s) => day >= s.range[0] && day <= s.range[1]
+  );
+  return match || BODY_CHANGES.stages[BODY_CHANGES.stages.length - 1];
 }

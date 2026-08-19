@@ -1,12 +1,7 @@
 import React, { useMemo } from 'react';
+import { CHALLENGE_DAYS, MILESTONES, isMilestoneUnlocked } from '../data/challenge';
 
-const MILESTONES = [
-  { day: 3, name: "첫 고비 돌파", emoji: "🌱", message: "가장 힘든 72시간을 이겨냈습니다! 알코올이 몸에서 완전히 빠져나갔어요. 당신은 이미 대부분의 사람들이 포기하는 첫 번째 고비를 넘었습니다. 진심으로 축하합니다!" },
-  { day: 7, name: "일주일 챔피언", emoji: "🏅", message: "일주일 동안 단 하루도 무너지지 않았습니다. 수면이 좋아지고, 몸이 가벼워진 게 느껴지시나요? 당신은 이미 챔피언입니다. 다음 목표는 21일!" },
-  { day: 21, name: "습관의 씨앗", emoji: "🌿", message: "21일! 과학이 증명한 습관 형성의 마법 숫자를 달성했습니다. 금주가 이제 당신의 새로운 일상이 되었어요. 피부는 맑아지고, 에너지는 넘칩니다. 절반까지 달려봅시다!" },
-  { day: 50, name: "절반의 영웅", emoji: "⚡", message: "50일! 챌린지의 절반을 넘었습니다. 간이 눈에 띄게 회복되고, 뇌 기능도 최고조를 향해 달려가고 있어요. 이 정도면 영웅이라 불려 마땅합니다. 이제 결승선이 보입니다!" },
-  { day: 90, name: "AFC 완주자", emoji: "🏆", message: "90일 완주!! 당신은 해냈습니다! 간이 완전히 회복되고, 심혈관 건강이 크게 개선됐으며, 새로운 당신이 탄생했습니다. AFC 완주자의 자격으로, 앞으로의 모든 도전도 이겨낼 수 있습니다. 정말 자랑스럽습니다!" },
-];
+const SECTION_SIZE = 50;
 
 function MilestoneToast({ milestone, onClose }) {
   return (
@@ -53,11 +48,10 @@ export default function Calendar({
     return Object.values(checkins).filter(Boolean).length;
   }, [checkins]);
 
-  const progressPercent = Math.round((completedDays / 90) * 100);
-
-  const achievedMilestones = useMemo(() => {
-    return milestones.filter((m) => dayNumber > m.day || completedDays >= m.day);
-  }, [milestones, dayNumber, completedDays]);
+  const progressPercent = Math.min(
+    Math.round((completedDays / CHALLENGE_DAYS) * 100),
+    100
+  );
 
   const getDayDateStr = (dayIndex) => {
     if (!startDate) return null;
@@ -73,7 +67,7 @@ export default function Calendar({
     return false;
   };
 
-  const cells = Array.from({ length: 90 }, (_, i) => {
+  const cells = Array.from({ length: CHALLENGE_DAYS }, (_, i) => {
     const day = i + 1;
     const isToday = day === dayNumber;
     const isPast = day < dayNumber;
@@ -82,6 +76,71 @@ export default function Calendar({
     const milestone = milestoneMap[day];
     return { day, isToday, isPast, isFuture, checked, milestone };
   });
+
+  // Split the grid into 50-day sections so 200 cells stay scannable on mobile.
+  const sections = useMemo(() => {
+    const chunks = [];
+    for (let i = 0; i < cells.length; i += SECTION_SIZE) {
+      const chunk = cells.slice(i, i + SECTION_SIZE);
+      chunks.push({
+        label: `Day ${i + 1}–${Math.min(i + SECTION_SIZE, CHALLENGE_DAYS)}`,
+        cells: chunk,
+      });
+    }
+    return chunks;
+  }, [cells]);
+
+  const renderCell = ({ day, isToday, isPast, isFuture, checked, milestone }) => (
+    <button
+      key={day}
+      onClick={() => milestone && (isPast || isToday) && setSelectedMilestone(milestone)}
+      className={[
+        "relative aspect-square flex flex-col items-center justify-center rounded-lg text-[8px] font-semibold tabular-nums transition-all duration-200 select-none",
+        checked
+          ? "bg-[#7C3AED]/30 border border-[#7C3AED]/60 shadow-[0_0_6px_rgba(124,58,237,0.4)]"
+          : isToday
+          ? "bg-[#4F46E5]/20 border-2 border-[#7C3AED] shadow-[0_0_8px_rgba(124,58,237,0.5)]"
+          : isFuture
+          ? "bg-[#0F0A1E]/60 border border-[#4F46E5]/10 opacity-30"
+          : "bg-[#0F0A1E] border border-[#4F46E5]/20",
+        milestone && (isPast || isToday) ? "cursor-pointer" : "cursor-default",
+      ].join(" ")}
+    >
+      {/* Milestone emoji badge */}
+      {milestone && (
+        <span
+          className={[
+            "absolute -top-1 -right-1 text-[9px] leading-none z-10",
+            isFuture ? "opacity-20" : "opacity-100",
+          ].join(" ")}
+          title={milestone.name}
+        >
+          {milestone.emoji}
+        </span>
+      )}
+
+      {/* Day number */}
+      <span
+        className={[
+          "leading-none",
+          checked
+            ? "text-[#A78BFA]"
+            : isToday
+            ? "text-[#A78BFA] font-bold"
+            : isPast
+            ? "text-[#A78BFA]/50"
+            : "text-[#A78BFA]/20",
+        ].join(" ")}
+      >
+        {checked ? "🥤" : day}
+      </span>
+
+      {/* Today indicator dot */}
+      {isToday && !checked && (
+        <span className="absolute bottom-0.5 w-1 h-1 rounded-full bg-[#7C3AED]" />
+      )}
+    </button>
+  );
 
   return (
     <div className="font-['Pretendard',_'Noto_Sans_KR',_sans-serif] min-h-screen bg-[#0F0A1E] text-[#F1F0F9] max-w-[360px] mx-auto relative overflow-x-hidden pb-24">
@@ -95,7 +154,7 @@ export default function Calendar({
       {/* Header */}
       <div className="px-4 pt-6 pb-4">
         <h1 className="text-2xl font-bold text-[#F1F0F9] tracking-tight leading-tight mb-1">
-          90일 챌린지 달력
+          200일 챌린지 달력
         </h1>
         <p className="text-xs text-[#A78BFA]/60 leading-relaxed">
           Day {dayNumber} · {completedDays}일 완료
@@ -117,7 +176,7 @@ export default function Calendar({
           </div>
           <div className="flex justify-between mt-2">
             <span className="text-[10px] text-[#A78BFA]/40">시작</span>
-            <span className="text-[10px] text-[#A78BFA]/40">90일</span>
+            <span className="text-[10px] text-[#A78BFA]/40">{CHALLENGE_DAYS}일</span>
           </div>
         </div>
       </div>
@@ -125,57 +184,19 @@ export default function Calendar({
       {/* Grid */}
       <div className="px-4 mb-6">
         <div className="bg-[#1A1035] rounded-2xl p-4 shadow-lg border border-[#7C3AED]/20 backdrop-blur-sm">
-          <div className="grid grid-cols-10 gap-1">
-            {cells.map(({ day, isToday, isPast, isFuture, checked, milestone }) => (
-              <button
-                key={day}
-                onClick={() => milestone && (isPast || isToday) && setSelectedMilestone(milestone)}
-                className={[
-                  "relative aspect-square flex flex-col items-center justify-center rounded-lg text-[9px] font-semibold transition-all duration-200 select-none",
-                  checked
-                    ? "bg-[#7C3AED]/30 border border-[#7C3AED]/60 shadow-[0_0_6px_rgba(124,58,237,0.4)]"
-                    : isToday
-                    ? "bg-[#4F46E5]/20 border-2 border-[#7C3AED] shadow-[0_0_8px_rgba(124,58,237,0.5)]"
-                    : isFuture
-                    ? "bg-[#0F0A1E]/60 border border-[#4F46E5]/10 opacity-30"
-                    : "bg-[#0F0A1E] border border-[#4F46E5]/20",
-                  milestone && (isPast || isToday) ? "cursor-pointer" : "cursor-default",
-                ].join(" ")}
-              >
-                {/* Milestone emoji badge */}
-                {milestone && (
-                  <span
-                    className={[
-                      "absolute -top-1.5 -right-1.5 text-[10px] leading-none z-10",
-                      isFuture ? "opacity-20" : "opacity-100",
-                    ].join(" ")}
-                    title={milestone.name}
-                  >
-                    {milestone.emoji}
+          <div className="flex flex-col gap-4">
+            {sections.map((section) => (
+              <div key={section.label}>
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="text-[9px] font-medium text-[#A78BFA]/40 tracking-wide uppercase">
+                    {section.label}
                   </span>
-                )}
-
-                {/* Day number */}
-                <span
-                  className={[
-                    "leading-none",
-                    checked
-                      ? "text-[#A78BFA]"
-                      : isToday
-                      ? "text-[#A78BFA] font-bold"
-                      : isPast
-                      ? "text-[#A78BFA]/50"
-                      : "text-[#A78BFA]/20",
-                  ].join(" ")}
-                >
-                  {checked ? "🥤" : day}
-                </span>
-
-                {/* Today indicator dot */}
-                {isToday && !checked && (
-                  <span className="absolute bottom-0.5 w-1 h-1 rounded-full bg-[#7C3AED]" />
-                )}
-              </button>
+                  <div className="flex-1 h-px bg-[#4F46E5]/15" />
+                </div>
+                <div className="grid grid-cols-10 gap-1">
+                  {section.cells.map(renderCell)}
+                </div>
+              </div>
             ))}
           </div>
 
@@ -204,7 +225,7 @@ export default function Calendar({
         </h2>
         <div className="flex flex-col gap-3">
           {milestones.map((m) => {
-            const unlocked = completedDays >= m.day || dayNumber > m.day;
+            const unlocked = isMilestoneUnlocked(m, dayNumber);
             return (
               <button
                 key={m.day}
