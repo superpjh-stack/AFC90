@@ -115,14 +115,14 @@ Chrome 확장이 연결돼 있지 않아 **브라우저 대신 서버 렌더링�
 
 ## 지금 해야 할 것
 
-전환·배포는 전부 끝났다. 남은 건 선택 항목뿐이다.
+**전환·배포·정리까지 전부 끝났다.** 이 프로젝트에서 이어서 할 일은 없다.
 
-1. (선택) `/pdca analyze AFC200` 재실행 — `docs/03-analysis/AFC90.analysis.md`는 지난
-   사이클의 **기록물**이라 일부러 안 건드렸다. 새 리포트를 만들려면 이걸 돌린다.
-2. (선택) 병합된 브랜치 정리 — `feat/afc-200`은 로컬·원격 모두 남아 있다.
-   지우려면 `git branch -d feat/afc-200 && git push origin --delete feat/afc-200`.
-3. (선택) `gh auth setup-git` — 안 하면 push할 때마다 자격 증명 헬퍼를 수동으로
-   붙여야 한다. 아래 "알아둘 것" 참고.
+남은 건 하나뿐인데, 이건 새 작업이라기보다 정리다:
+
+- **`CLAUDE.md`가 낡았다.** "No source code exists yet", "Phase 1 (Planning)"이라고
+  적혀 있지만 실제로는 앱이 완성되어 프로덕션에 배포돼 있다. 또 `/pdca` 파이프라인을
+  전제하는데 **이 환경에 `/pdca` 명령이 없다**(커맨드 파일도, `.bkit/`·`.omc/`도 없음).
+  다음 세션이 헛돌지 않으려면 고치는 게 좋다.
 
 ## PR 본문 (PR #1에 반영됨 — 기록용)
 
@@ -243,7 +243,9 @@ GIT_ASKPASS=/usr/bin/false GIT_TERMINAL_PROMPT=0 \
 GIT_ASKPASS= git -c credential.helper='!gh auth git-credential' push -u origin feat/afc-200
 ```
 
-영구히 고치려면 `gh auth setup-git`을 한 번 돌리면 된다.
+**2026-08-19에 `gh auth setup-git`을 돌려 영구 해결했다.** 전역 설정에
+`credential.https://github.com.helper = !/opt/homebrew/bin/gh auth git-credential`이
+들어갔고, 이제 평범한 `git push`가 그냥 통과한다. 위 우회는 더 이상 필요 없다.
 
 당시 검토했던 선택지(참고용):
 
@@ -253,6 +255,27 @@ GIT_ASKPASS= git -c credential.helper='!gh auth git-credential' push -u origin f
   이후 push가 조용히 통과하고, PR도 `gh pr create`로 만들 수 있다 (가장 깔끔)
 - **SSH 키 등록** — `ssh-keygen` → GitHub에 공개키 등록 →
   `git remote set-url origin git@github.com:superpjh-stack/AFC90.git`
+
+### `/pdca`는 이 환경에 없다
+
+`CLAUDE.md`가 `/pdca plan|design|do|analyze|iterate|report` 파이프라인을 전제하지만
+**실제로는 존재하지 않는다** — `~/.claude/commands/`에는 `re-begin.md`뿐이고
+`.bkit/`·`.omc/` 상태 디렉터리도 없다. `docs/03-analysis/AFC90.analysis.md`는
+과거 다른 환경에서 만들어진 산출물이다. `/pdca ...`를 시도하지 마라.
+
+### squash 머지 후 브랜치 삭제 — `--merged`가 거짓말한다
+
+`gh pr merge --squash`는 새 커밋을 만들기 때문에 조상 관계가 끊긴다. 그래서
+`git branch --merged main`에 병합된 브랜치가 **안 잡힌다.** 이걸 안전 점검으로 쓰면
+멀쩡한 브랜치를 "미병합"으로 오판한다. 실제 확인은 내용 비교로 해야 한다:
+
+```
+git diff <브랜치팁> main --name-only    # 비어 있으면 내용 동일
+```
+
+`feat/afc-200`(팁 `5e01339`)은 이 방식으로 확인 후 로컬·원격 모두 삭제했다.
+차이는 `progress.md` 하나였고 그건 머지 후 main에서 갱신한 내용이다.
+커밋 객체는 reflog에 남아 있어 필요하면 복구 가능하다.
 
 ### `gh` CLI — 설치·인증 완료 (2026-08-19)
 
