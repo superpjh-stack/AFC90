@@ -88,16 +88,22 @@ Chrome 확장이 연결돼 있지 않아 **브라우저 대신 서버 렌더링�
 
 ## 지금 해야 할 것
 
-1. **push + PR** — 아직 로컬 커밋 3개뿐이다. 원격에 브랜치가 없다.
-   **먼저 GitHub 인증을 붙여야 한다** — 자격 증명이 아무 데도 없어서 push가
-   무한 대기한다. 자세한 원인과 선택지는 "알아둘 것"의 askpass 절 참고.
-   가장 깔끔한 길은 `brew install gh && gh auth login`이고, 그 뒤에 push한다.
+1. **GitHub 인증 → push → PR** — 로컬 커밋만 있고 원격에 브랜치가 없다.
+   `gh`는 설치돼 있으니 **인증만 하면 된다.** 인증은 사용자가 직접 한다:
+
+   ```
+   gh auth login
+   ```
+
+   `GitHub.com` → `HTTPS` → `Login with a web browser`를 고르면 일회용 코드가 뜬다.
+   **화살표 선택이 있는 TUI라 Terminal.app이나 VS Code 통합 터미널에서 실행하는 게 안전하다.**
+   인증이 끝나면 git 자격 증명도 함께 등록되어 push가 조용히 통과한다.
 
    ```
    git push -u origin feat/afc-200
    ```
 
-   성공하면 아래 URL로 PR을 연다 (`gh` 설치 후라면 `gh pr create`도 가능). 본문 초안은 이 파일의 "PR 본문" 절에 있다.
+   그다음 PR은 아래 URL로 열거나 `gh pr create --base main --fill`로 만든다. 본문 초안은 이 파일의 "PR 본문" 절에 있다.
 
    ```
    https://github.com/superpjh-stack/AFC90/compare/main...feat/afc-200?expand=1
@@ -250,10 +256,12 @@ GIT_ASKPASS=/usr/bin/false GIT_TERMINAL_PROMPT=0 \
 - **SSH 키 등록** — `ssh-keygen` → GitHub에 공개키 등록 →
   `git remote set-url origin git@github.com:superpjh-stack/AFC90.git`
 
-### `gh` CLI가 없다
+### `gh` CLI — 설치됨 (2026-08-19), 아직 미인증
 
-이 머신에 GitHub CLI가 설치돼 있지 않다. **PR을 명령줄에서 못 만든다** — compare URL을
-열어 웹에서 눌러야 한다. 다음 세션에서 다시 확인하느라 시간 쓰지 마라.
+`brew install gh`로 **gh 2.97.0 설치 완료**. 다만 `gh auth status`는
+`You are not logged into any GitHub hosts`다. **인증은 에이전트가 하지 않는다** —
+계정 로그인은 사용자 몫이다.
+
 `origin`은 https://github.com/superpjh-stack/AFC90.git 이고, 저장소 이름은
 전환 후에도 `AFC90` 그대로다(일부러 유지).
 
