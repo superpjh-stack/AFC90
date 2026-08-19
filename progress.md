@@ -76,6 +76,14 @@ Lally et al. 2010, 출처 명시)과 재발 고위험 구간(3~6개월) 통과�
 3. **해금 조건 불일치** — Calendar는 `dayNumber > m.day || completedDays >= m.day`,
    Dashboard는 `dayNumber >= m.day`로 서로 달랐다. `isMilestoneUnlocked()`로 통일.
 
+### GitHub push + PR — 완료 (2026-08-19)
+
+`feat/afc-200`을 `origin`에 올리고 **PR #1**을 열었다. `main`은 `b112550` 그대로다.
+
+https://github.com/superpjh-stack/AFC90/pull/1 — OPEN, 18파일 `+653/-428`
+
+`gh auth login`(브라우저 device flow, 계정 `superpjh-stack`)으로 인증했다.
+
 ### 검증 — 전부 통과
 
 Chrome 확장이 연결돼 있지 않아 **브라우저 대신 서버 렌더링으로** 검증했다.
@@ -88,28 +96,7 @@ Chrome 확장이 연결돼 있지 않아 **브라우저 대신 서버 렌더링�
 
 ## 지금 해야 할 것
 
-1. **GitHub 인증 → push → PR** — 로컬 커밋만 있고 원격에 브랜치가 없다.
-   `gh`는 설치돼 있으니 **인증만 하면 된다.** 인증은 사용자가 직접 한다:
-
-   ```
-   gh auth login
-   ```
-
-   `GitHub.com` → `HTTPS` → `Login with a web browser`를 고르면 일회용 코드가 뜬다.
-   **화살표 선택이 있는 TUI라 Terminal.app이나 VS Code 통합 터미널에서 실행하는 게 안전하다.**
-   인증이 끝나면 git 자격 증명도 함께 등록되어 push가 조용히 통과한다.
-
-   ```
-   git push -u origin feat/afc-200
-   ```
-
-   그다음 PR은 아래 URL로 열거나 `gh pr create --base main --fill`로 만든다. 본문 초안은 이 파일의 "PR 본문" 절에 있다.
-
-   ```
-   https://github.com/superpjh-stack/AFC90/compare/main...feat/afc-200?expand=1
-   ```
-
-2. **브라우저에서 눈으로 확인** — 유일하게 남은 검증 공백이다. dev 서버를 띄우고
+1. **브라우저에서 눈으로 확인** — 유일하게 남은 검증 공백이다. dev 서버를 띄우고
    (`npm run dev` → http://localhost:5173) DevTools 콘솔에 아래를 붙여 넣으면
    Day 121 상태로 바로 간다. 레거시 키만 심으므로 마이그레이션도 같이 검증된다:
 
@@ -135,10 +122,10 @@ Chrome 확장이 연결돼 있지 않아 **브라우저 대신 서버 렌더링�
    - SOS 모달 붉은 그라데이션 애니메이션이 안 깨졌는지 (`90deg` 오변경 방지)
    - DevTools Application 탭에서 `afc200_*` 키가 생기고 `afc90_*`가 보존됐는지
 
-3. (선택) `/pdca analyze AFC200` 재실행 — `docs/03-analysis/AFC90.analysis.md`는 지난
+2. (선택) `/pdca analyze AFC200` 재실행 — `docs/03-analysis/AFC90.analysis.md`는 지난
    사이클의 **기록물**이라 일부러 안 건드렸다. 새 리포트를 만들려면 이걸 돌린다.
 
-## PR 본문
+## PR 본문 (PR #1에 이미 반영됨)
 
 `main ← feat/afc-200` PR에 붙여 넣을 초안. compare URL을 열면 제목은 자동으로
 첫 커밋 제목이 들어가므로 본문만 채우면 된다.
@@ -246,8 +233,20 @@ GIT_ASKPASS=/usr/bin/false GIT_TERMINAL_PROMPT=0 \
 # fatal: could not read Username for 'https://github.com': terminal prompts disabled
 ```
 
-**대응**: 에이전트는 재시도하지 마라. 자격 증명 입력은 에이전트가 해서는 안 되는 일이다.
-사용자가 아래 중 하나를 먼저 해야 한다.
+**해결됨 (2026-08-19).** `gh auth login` 후에도 push가 또 멈췄는데, 원인은
+**`gh auth setup-git`이 안 걸려서** git의 `credential.helper`가 여전히 `osxkeychain`
+하나뿐이었기 때문이다. gh 헬퍼 자체는 잘 동작한다
+(`printf 'protocol=https\nhost=github.com\n\n' | gh auth git-credential get`으로 확인).
+
+전역 설정을 건드리지 않고 이 명령으로 통과시켰다:
+
+```
+GIT_ASKPASS= git -c credential.helper='!gh auth git-credential' push -u origin feat/afc-200
+```
+
+영구히 고치려면 `gh auth setup-git`을 한 번 돌리면 된다.
+
+당시 검토했던 선택지(참고용):
 
 - **VS Code 통합 터미널이나 Terminal.app에서 직접 push** — 거기서는 프롬프트가
   실제로 뜬다. 단 GitHub는 비밀번호를 안 받으므로 **Personal Access Token**이 필요하다
@@ -256,11 +255,11 @@ GIT_ASKPASS=/usr/bin/false GIT_TERMINAL_PROMPT=0 \
 - **SSH 키 등록** — `ssh-keygen` → GitHub에 공개키 등록 →
   `git remote set-url origin git@github.com:superpjh-stack/AFC90.git`
 
-### `gh` CLI — 설치됨 (2026-08-19), 아직 미인증
+### `gh` CLI — 설치·인증 완료 (2026-08-19)
 
-`brew install gh`로 **gh 2.97.0 설치 완료**. 다만 `gh auth status`는
-`You are not logged into any GitHub hosts`다. **인증은 에이전트가 하지 않는다** —
-계정 로그인은 사용자 몫이다.
+`gh 2.97.0`, 계정 `superpjh-stack`, 토큰 스코프 `gist`/`read:org`/`repo`.
+인증은 `gh auth login --web` 기기 코드 방식으로 했다 — 에이전트가 코드를 전달하고
+**브라우저 승인은 사용자가** 했다. 계정 로그인·비밀번호 입력은 에이전트가 하지 않는다.
 
 `origin`은 https://github.com/superpjh-stack/AFC90.git 이고, 저장소 이름은
 전환 후에도 `AFC90` 그대로다(일부러 유지).
