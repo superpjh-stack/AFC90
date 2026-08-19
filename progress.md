@@ -1,6 +1,6 @@
 # 진행 상황
 
-마지막 갱신: 2026-08-18
+마지막 갱신: 2026-08-19
 
 ## 이 프로젝트가 하는 일
 
@@ -35,8 +35,8 @@ npm run build
 
 ### 90일 → 200일 전환 — 완료 (코드 + 기획 문서 전부)
 
-커밋하지 않은 작업 트리 상태다. 16개 파일 수정 + `src/data/challenge.js` 신규 +
-`src/data/content.js` 삭제. `+283 / -428`.
+브랜치 `feat/afc-200`, 커밋 `96d3633`. 18개 파일 `+504 / -428`.
+`main`은 그대로 두었고 push는 하지 않았다.
 
 **마일스톤 5종 → 8종.** 기존 날짜(3·7·21·50·90)는 그대로 두고 100·150·200을 추가했다.
 200일 기준에서 의미가 깨지는 두 배지는 이름을 알맞은 날짜로 옮겼다.
@@ -88,16 +88,34 @@ Chrome 확장이 연결돼 있지 않아 **브라우저 대신 서버 렌더링�
 
 ## 지금 해야 할 것
 
-1. **브라우저에서 눈으로 확인** — 아직 못 한 유일한 항목이다. `npm run dev` 후
-   `http://localhost:5173`. 온보딩 시작일을 **과거 날짜**로 넣어야 후반 구간이 보인다.
-   - 오늘 −120일 → 대시보드 다음 목표 150일, 신체변화 "재생 완성기" 진행 중, 진행바 60%
-   - 오늘 −220일 → 마지막 단계가 여전히 진행 중이고 화면이 비지 않는지 (회귀 테스트)
-   - 캘린더 200칸이 4섹션으로 끊겨 보이는지, 3자리 숫자가 셀을 넘치지 않는지
+1. **브라우저에서 눈으로 확인** — 유일하게 남은 항목이다. dev 서버는 띄워 뒀다
+   (`npm run dev` → http://localhost:5173). 온보딩 시작일을 **과거 날짜**로 넣어야
+   후반 구간이 보인다. DevTools 콘솔에 아래를 붙여 넣으면 Day 121 상태로 바로 간다
+   (레거시 키만 심으므로 마이그레이션도 같이 검증된다):
+
+   ```js
+   localStorage.clear();
+   const start = new Date(); start.setDate(start.getDate() - 120);
+   const f = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+   const startDate = f(start), checkins = {}, d = new Date(start);
+   for (let i = 0; i < 121; i++) { checkins[f(d)] = true; d.setDate(d.getDate()+1); }
+   localStorage.setItem('afc90_profile', JSON.stringify({name:'길동',height:175,weight:78,weeklyDrinks:14,startDate}));
+   localStorage.setItem('afc90_checkins', JSON.stringify(checkins));
+   localStorage.setItem('afc90_shown_milestones', JSON.stringify([3,7,21]));
+   location.reload();
+   ```
+
+   `- 120`을 `- 220`으로 바꾸면 Day 221(200일 초과 회귀 테스트)이 된다.
+
+   볼 것:
+   - 대시보드 헤더 "AFC 200일 챌린지", 다음 목표 150일 (Day 221이면 "전 배지 달성!")
+   - 캘린더 200칸이 `Day 1–50` 등 4섹션으로 끊겨 보이고, 3자리 숫자가 셀을 안 넘치는지
+   - 마일스톤 배지 8종, 신체변화 "재생 완성기" 진행 중 / 진행바 "200일 여정" 60%
+   - Day 221에서도 마지막 단계가 진행 중으로 남고 화면이 비지 않는지
    - SOS 모달 붉은 그라데이션 애니메이션이 안 깨졌는지 (`90deg` 오변경 방지)
-   - 마이그레이션: DevTools에서 `afc90_profile`·`afc90_checkins`만 넣고 새로고침 →
-     `afc200_*`로 옮겨지고 기록이 유지되는지
-2. **커밋** — 사용자가 아직 커밋을 지시하지 않았다. 브랜치는 `main`이므로 브랜치를
-   먼저 파는 게 맞는지 물어볼 것.
+   - DevTools Application 탭에서 `afc200_*` 키가 생기고 `afc90_*`가 보존됐는지
+
+2. (선택) **push / PR** — 아직 로컬 커밋만 있다. `git push -u origin feat/afc-200`.
 3. (선택) `/pdca analyze AFC200` 재실행 — `docs/03-analysis/AFC90.analysis.md`는 지난
    사이클의 **기록물**이라 일부러 안 건드렸다. 새 리포트를 만들려면 이걸 돌린다.
 
@@ -123,6 +141,14 @@ Chrome 확장이 연결돼 있지 않아 **브라우저 대신 서버 렌더링�
 여기에 200을 박으면 Day 201부터 진행 중인 단계가 사라진다 — 전환 전 `[31, 90]`이
 바로 그래서 Day 91부터 모든 단계가 "완료"로 뜨고 현재 단계가 없어졌다.
 크래시는 아니었다(`currentStageIndex`는 계산만 하고 아무 데도 안 쓰는 죽은 변수).
+
+### Playwright는 캐시 버전이 안 맞는다
+
+`~/Library/Caches/ms-playwright`에 chromium **1208**이 있는데 playwright 1.62는
+**1234**를 찾아서 `Executable doesn't exist`로 죽는다. 쓰려면 `npx playwright install
+chromium`으로 받거나 `chromium.launch({ channel: 'chrome' })`로 설치된 Google Chrome을
+쓴다. **다만 사용자는 실제 Chrome을 띄우는 방식을 원하지 않았다** — 브라우저 확인은
+사용자가 직접 하고, 나는 dev 서버만 띄우는 것으로 합의했다.
 
 ### 브라우저 없이 검증하는 법
 
