@@ -89,13 +89,15 @@ Chrome 확장이 연결돼 있지 않아 **브라우저 대신 서버 렌더링�
 ## 지금 해야 할 것
 
 1. **push + PR** — 아직 로컬 커밋 3개뿐이다. 원격에 브랜치가 없다.
-   **push는 사용자가 직접 실행해야 한다** (에이전트가 돌리면 인증 프롬프트에서 멈춘다):
+   **먼저 GitHub 인증을 붙여야 한다** — 자격 증명이 아무 데도 없어서 push가
+   무한 대기한다. 자세한 원인과 선택지는 "알아둘 것"의 askpass 절 참고.
+   가장 깔끔한 길은 `brew install gh && gh auth login`이고, 그 뒤에 push한다.
 
    ```
-   ! git push -u origin feat/afc-200
+   git push -u origin feat/afc-200
    ```
 
-   성공하면 아래 URL로 PR을 연다. 본문 초안은 이 파일의 "PR 본문" 절에 있다.
+   성공하면 아래 URL로 PR을 연다 (`gh` 설치 후라면 `gh pr create`도 가능). 본문 초안은 이 파일의 "PR 본문" 절에 있다.
 
    ```
    https://github.com/superpjh-stack/AFC90/compare/main...feat/afc-200?expand=1
@@ -209,15 +211,44 @@ Lally et al. 2010)에 대다수가 도달하는 지점이다.
 바로 그래서 Day 91부터 모든 단계가 "완료"로 뜨고 현재 단계가 없어졌다.
 크래시는 아니었다(`currentStageIndex`는 계산만 하고 아무 데도 안 쓰는 죽은 변수).
 
-### push는 에이전트가 못 한다 — 인증에서 멈춘다
+### push가 무한 대기하는 진짜 이유 — VS Code askpass
 
-`git push -u origin feat/afc-200`을 돌리면 **3분 타임아웃까지 무응답**이다.
-`credential.helper`는 `osxkeychain`인데 키체인에 유효한 자격 증명이 없어서
-사용자명/비밀번호 프롬프트에 걸리는 것으로 보인다. 읽기(`git ls-remote`)는
-공개 저장소라 익명으로 되므로 **네트워크 문제가 아니다.**
+`git push`가 **아무 출력 없이 무한 대기**한다. 에이전트가 돌려도, 사용자가 `!`로
+돌려도 똑같다. 원인은 두 가지가 겹친 것이다:
 
-**대응**: 재시도하지 마라. 사용자에게 `! git push -u origin feat/afc-200`을
-직접 실행하도록 안내한다. 자격 증명 입력은 에이전트가 해서는 안 되는 일이다.
+1. **자격 증명이 아무 데도 없다** — 키체인에 `github.com` 항목 없음, SSH 키도 없음
+   (`~/.ssh/*.pub` 없음)
+2. **`GIT_ASKPASS`가 VS Code의 askpass 헬퍼를 가리킨다**
+   (`/Applications/Visual Studio Code.app/.../git/dist/askpass.sh`). git이 자격 증명을
+   물으려 하면 VS Code IPC 소켓으로 다이얼로그를 띄우는데, 이 세션에서는 아무도
+   답하지 않아 영원히 멈춘다. `GIT_TERMINAL_PROMPT=0`은 askpass보다 우선순위가
+   낮아서 소용없다.
+
+**네트워크 문제가 아니다** — 확인했다:
+
+| 확인 | 결과 |
+|---|---|
+| `.../info/refs?service=git-upload-pack` (읽기) | `200`, 0.31초 |
+| `.../info/refs?service=git-receive-pack` (쓰기) | `401` 인증 필요, 0.31초 |
+| 프록시 환경변수 / git http 설정 | 없음 |
+
+진단용 재현 (즉시 실패한다):
+
+```
+GIT_ASKPASS=/usr/bin/false GIT_TERMINAL_PROMPT=0 \
+  git -c credential.helper= push --dry-run origin feat/afc-200
+# fatal: could not read Username for 'https://github.com': terminal prompts disabled
+```
+
+**대응**: 에이전트는 재시도하지 마라. 자격 증명 입력은 에이전트가 해서는 안 되는 일이다.
+사용자가 아래 중 하나를 먼저 해야 한다.
+
+- **VS Code 통합 터미널이나 Terminal.app에서 직접 push** — 거기서는 프롬프트가
+  실제로 뜬다. 단 GitHub는 비밀번호를 안 받으므로 **Personal Access Token**이 필요하다
+- **`brew install gh && gh auth login`** — 브라우저로 인증하고 자격 증명을 저장해 준다.
+  이후 push가 조용히 통과하고, PR도 `gh pr create`로 만들 수 있다 (가장 깔끔)
+- **SSH 키 등록** — `ssh-keygen` → GitHub에 공개키 등록 →
+  `git remote set-url origin git@github.com:superpjh-stack/AFC90.git`
 
 ### `gh` CLI가 없다
 
