@@ -1,6 +1,6 @@
 # 진행 상황
 
-마지막 갱신: 2026-08-19
+마지막 갱신: 2026-08-19 (프로덕션 배포 완료)
 
 ## 이 프로젝트가 하는 일
 
@@ -84,22 +84,24 @@ https://github.com/superpjh-stack/AFC90/pull/1 — OPEN, 18파일 `+653/-428`
 
 `gh auth login`(브라우저 device flow, 계정 `superpjh-stack`)으로 인증했다.
 
-### Vercel Preview 배포 — 자동 완료 (2026-08-19)
+### 머지 + 프로덕션 배포 — 완료 (2026-08-19)
 
-이 저장소는 **Vercel이 GitHub에 연동돼 있어 push만으로 배포된다.** CLI도 링크도 필요 없다
-(`vercel` CLI 미설치, `.vercel` 없음 — 그래도 배포된다).
+PR #1을 **squash 머지**했다 (`4e4f295`). 이 저장소는 **Vercel이 GitHub에 연동돼 있어
+push/머지만으로 배포된다** — CLI도 `vercel link`도 필요 없다
+(`vercel` CLI 미설치, `.vercel` 없음, 그래도 배포된다).
 
-| 환경 | URL | 상태 |
-|---|---|---|
-| Preview (`feat/afc-200`) | https://afc90-git-feat-afc-200-gerardo-team.vercel.app | ✅ 배포 성공 |
-| Production (`main`) | https://afc90.vercel.app | ⚠️ **아직 옛 90일 빌드** |
+| 환경 | 트리거 | URL | 상태 |
+|---|---|---|---|
+| Production | `main` | https://afc90.vercel.app | ✅ AFC 200 라이브 |
+| Preview | 각 브랜치 | https://afc90-git-feat-afc-200-gerardo-team.vercel.app | ✅ 배포됨 |
 
-프로덕션은 `main`에서만 나간다. PR #1을 머지해야 200일 버전이 라이브가 된다.
-확인 결과 프로덕션 번들에는 아직 `AFC 90`·`afc90_profile`만 있고 `AFC 200`은 0건이다.
+프로덕션 번들을 직접 검증했다 — `<title>AFC 200</title>`, `AFC 200` 2건,
+`200일 챌린지 달력`·`절반의 영웅`·`세포 재생 완성`·`재생 완성기`·`새로운 나` 각 1건,
+`afc200_profile` 1건. **옛 문구는 0건** (`AFC 90`, `90일 챌린지 달력`, `술 없이 90일`).
+`afc90_profile`이 1건 남아 있는 건 정상 — 마이그레이션용 레거시 키다.
 
-**Preview는 Vercel SSO(Deployment Protection)가 걸려 있다** — 익명 접근은 302로
-`vercel.com/login`으로 튕긴다. Vercel 계정에 로그인한 브라우저에서만 열린다.
-그래서 curl로는 내용 검증이 불가능하다.
+**Preview에는 Vercel SSO(Deployment Protection)가 걸려 있다** — 익명 접근은 302로
+`vercel.com/login`으로 튕겨서 curl 검증이 안 된다. 프로덕션은 공개라 검증된다.
 
 ### 검증 — 전부 통과
 
@@ -113,45 +115,16 @@ Chrome 확장이 연결돼 있지 않아 **브라우저 대신 서버 렌더링�
 
 ## 지금 해야 할 것
 
-1. **브라우저에서 눈으로 확인** — 유일하게 남은 검증 공백이다. **배포된 Preview에서
-   바로 하면 된다** (Vercel 로그인된 브라우저 필요):
+전환·배포는 전부 끝났다. 남은 건 선택 항목뿐이다.
 
-   https://afc90-git-feat-afc-200-gerardo-team.vercel.app
-
-   로컬로 하려면 `npm run dev` → http://localhost:5173. 어느 쪽이든 DevTools 콘솔에
-   아래를 붙여 넣으면 Day 121 상태로 바로 간다. 레거시 키만 심으므로 마이그레이션도
-   같이 검증된다:
-
-   ```js
-   localStorage.clear();
-   const start = new Date(); start.setDate(start.getDate() - 120);
-   const f = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-   const startDate = f(start), checkins = {}, d = new Date(start);
-   for (let i = 0; i < 121; i++) { checkins[f(d)] = true; d.setDate(d.getDate()+1); }
-   localStorage.setItem('afc90_profile', JSON.stringify({name:'길동',height:175,weight:78,weeklyDrinks:14,startDate}));
-   localStorage.setItem('afc90_checkins', JSON.stringify(checkins));
-   localStorage.setItem('afc90_shown_milestones', JSON.stringify([3,7,21]));
-   location.reload();
-   ```
-
-   `- 120`을 `- 220`으로 바꾸면 Day 221(200일 초과 회귀 테스트)이 된다.
-
-   볼 것:
-   - 대시보드 헤더 "AFC 200일 챌린지", 다음 목표 150일 (Day 221이면 "전 배지 달성!")
-   - 캘린더 200칸이 `Day 1–50` 등 4섹션으로 끊겨 보이고, 3자리 숫자가 셀을 안 넘치는지
-   - 마일스톤 배지 8종, 신체변화 "재생 완성기" 진행 중 / 진행바 "200일 여정" 60%
-   - Day 221에서도 마지막 단계가 진행 중으로 남고 화면이 비지 않는지
-   - SOS 모달 붉은 그라데이션 애니메이션이 안 깨졌는지 (`90deg` 오변경 방지)
-   - DevTools Application 탭에서 `afc200_*` 키가 생기고 `afc90_*`가 보존됐는지
-
-2. **프로덕션 배포** — Preview 확인이 끝나면 PR #1을 `main`에 머지한다.
-   Vercel이 `main`을 자동으로 프로덕션 배포하므로 **머지가 곧 배포다.**
-   `gh pr merge 1 --squash` 또는 GitHub 웹에서. 되돌리려면 revert 커밋이 필요하다.
-
-3. (선택) `/pdca analyze AFC200` 재실행 — `docs/03-analysis/AFC90.analysis.md`는 지난
+1. (선택) `/pdca analyze AFC200` 재실행 — `docs/03-analysis/AFC90.analysis.md`는 지난
    사이클의 **기록물**이라 일부러 안 건드렸다. 새 리포트를 만들려면 이걸 돌린다.
+2. (선택) 병합된 브랜치 정리 — `feat/afc-200`은 로컬·원격 모두 남아 있다.
+   지우려면 `git branch -d feat/afc-200 && git push origin --delete feat/afc-200`.
+3. (선택) `gh auth setup-git` — 안 하면 push할 때마다 자격 증명 헬퍼를 수동으로
+   붙여야 한다. 아래 "알아둘 것" 참고.
 
-## PR 본문 (PR #1에 이미 반영됨)
+## PR 본문 (PR #1에 반영됨 — 기록용)
 
 `main ← feat/afc-200` PR에 붙여 넣을 초안. compare URL을 열면 제목은 자동으로
 첫 커밋 제목이 들어가므로 본문만 채우면 된다.
