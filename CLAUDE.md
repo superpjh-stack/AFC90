@@ -10,9 +10,14 @@ day-by-day body-recovery infographic.
 
 **Shipped and live in production**: https://afc90.vercel.app
 
-The repo and folder are still named `AFC90` (and `origin` is
-`github.com/superpjh-stack/AFC90`) — that is deliberate. The challenge was 90 days
-until 2026-08-19; only the product name and duration changed, not the repo identity.
+The challenge was 90 days until 2026-08-19, and two names still carry the old number —
+both deliberately:
+
+- **The local folder is `~/Documents/GitHub/AFC90`.** The GitHub repo was renamed to
+  `AFC200` (`github.com/superpjh-stack/AFC200`), but the working copy on disk was not,
+  so the path and the remote disagree. That is expected, not drift.
+- **Production is `afc90.vercel.app`.** The Vercel project keeps its original name;
+  renaming it would break every existing link to the live site.
 
 ## Commands
 

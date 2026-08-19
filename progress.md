@@ -18,8 +18,11 @@ npm run dev      # http://localhost:5173
 npm run build
 ```
 
-**원래 90일 챌린지(AFC 90)였고, 2026-08-18에 200일로 전환했다.** 폴더·저장소 이름
-`AFC90`과 git remote는 일부러 그대로 뒀다.
+**원래 90일 챌린지(AFC 90)였고, 2026-08-18에 200일로 전환했다.**
+GitHub 저장소는 2026-08-19에 `AFC90` → **`AFC200`**으로 이름을 바꿨다.
+다만 **로컬 폴더는 여전히 `~/Documents/GitHub/AFC90`**이고
+**프로덕션 URL도 `afc90.vercel.app` 그대로**다 — 둘 다 의도된 것이니
+경로와 remote가 어긋나 보여도 정상이다.
 
 ### 단일 출처 (여기만 고치면 전 화면에 반영된다)
 
@@ -80,7 +83,7 @@ Lally et al. 2010, 출처 명시)과 재발 고위험 구간(3~6개월) 통과�
 
 `feat/afc-200`을 `origin`에 올리고 **PR #1**을 열었다. `main`은 `b112550` 그대로다.
 
-https://github.com/superpjh-stack/AFC90/pull/1 — OPEN, 18파일 `+653/-428`
+https://github.com/superpjh-stack/AFC200/pull/1 — OPEN, 18파일 `+653/-428`
 
 `gh auth login`(브라우저 device flow, 계정 `superpjh-stack`)으로 인증했다.
 
@@ -251,7 +254,7 @@ GIT_ASKPASS= git -c credential.helper='!gh auth git-credential' push -u origin f
 - **`brew install gh && gh auth login`** — 브라우저로 인증하고 자격 증명을 저장해 준다.
   이후 push가 조용히 통과하고, PR도 `gh pr create`로 만들 수 있다 (가장 깔끔)
 - **SSH 키 등록** — `ssh-keygen` → GitHub에 공개키 등록 →
-  `git remote set-url origin git@github.com:superpjh-stack/AFC90.git`
+  `git remote set-url origin git@github.com:superpjh-stack/AFC200.git`
 
 ### `/pdca`는 이 환경에 없다
 
@@ -280,8 +283,8 @@ git diff <브랜치팁> main --name-only    # 비어 있으면 내용 동일
 인증은 `gh auth login --web` 기기 코드 방식으로 했다 — 에이전트가 코드를 전달하고
 **브라우저 승인은 사용자가** 했다. 계정 로그인·비밀번호 입력은 에이전트가 하지 않는다.
 
-`origin`은 https://github.com/superpjh-stack/AFC90.git 이고, 저장소 이름은
-전환 후에도 `AFC90` 그대로다(일부러 유지).
+`origin`은 https://github.com/superpjh-stack/AFC200.git 이다
+(2026-08-19에 `AFC90`에서 이름 변경, 옛 URL은 GitHub가 리다이렉트한다).
 
 ### Playwright는 캐시 버전이 안 맞는다
 
